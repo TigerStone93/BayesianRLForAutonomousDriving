@@ -2,6 +2,7 @@ from keras.models import Sequential, Model
 from keras.layers import Dense, Activation, Flatten, Lambda, add, Input, Reshape, Conv1D, MaxPooling1D, concatenate
 import keras.backend as K
 
+# ========================================================================================== #
 
 class NetworkMLP(object):
     """
@@ -41,7 +42,9 @@ class NetworkMLP(object):
                                                     prior_scale_factor=prior_scale_factor, window_length=window_length)
         else:
             raise Exception('Error in Network creation')
-
+    
+    # ============================================================ #
+    
     def build_mlp(self, nb_inputs, nb_outputs, nb_hidden_layers, nb_hidden_neurons, activation='relu', window_length=1):
         self.model = Sequential()
         self.model.add(Flatten(input_shape=(window_length, nb_inputs)))
@@ -49,7 +52,9 @@ class NetworkMLP(object):
             self.model.add(Dense(nb_hidden_neurons))
             self.model.add(Activation(activation))
         self.model.add(Dense(nb_outputs, activation='linear'))
-
+    
+    # ============================================================ #
+    
     def build_mlp_dueling(self, nb_inputs, nb_outputs, nb_hidden_layers, nb_hidden_neurons, dueling_type='avg',
                           activation='relu', window_length=1):
         self.build_mlp(nb_inputs, nb_outputs, nb_hidden_layers, nb_hidden_neurons, activation=activation,
@@ -67,7 +72,9 @@ class NetworkMLP(object):
         else:
             assert False, "dueling_type must be one of {'avg','max','naive'}"
         self.model = Model(inputs=self.model.input, outputs=outputlayer)
-
+    
+    # ============================================================ #
+    
     def build_prior_plus_trainable(self, nb_inputs, nb_outputs, nb_hidden_layers, nb_hidden_neurons, activation='relu',
                                    prior_scale_factor=1., window_length=1):
         net_input = Input(shape=(window_length, nb_inputs), name='input')
@@ -88,7 +95,9 @@ class NetworkMLP(object):
         add_output = add([trainable_out, prior_scale], name='add')
 
         self.model = Model(inputs=net_input, outputs=add_output)
-
+    
+    # ============================================================ #
+    
     def build_prior_plus_trainable_dueling(self, nb_inputs, nb_outputs, nb_hidden_layers, nb_hidden_neurons,
                                            activation='relu', prior_scale_factor=1., dueling_type='avg',
                                            window_length=1):
@@ -135,6 +144,7 @@ class NetworkMLP(object):
 
         self.model = Model(inputs=net_input, outputs=add_output)
 
+# ========================================================================================== #
 
 class NetworkCNN(object):
     """
@@ -178,7 +188,9 @@ class NetworkCNN(object):
                                          prior_scale_factor=prior_scale_factor, window_length=window_length)
         else:
             raise Exception('Error in Network creation')
-
+    
+    # ============================================================ #
+    
     def build_cnn(self, nb_ego_states, nb_states_per_vehicle, nb_vehicles, nb_actions, nb_conv_layers, nb_conv_filters,
                   nb_hidden_fc_layers, nb_hidden_neurons, activation='relu', window_length=1):
         nb_inputs = nb_ego_states + nb_states_per_vehicle * nb_vehicles
@@ -210,7 +222,9 @@ class NetworkCNN(object):
         output = Dense(nb_actions, activation='linear', name='output')(joint_net)
 
         self.model = Model(inputs=net_input, outputs=output)
-
+    
+    # ============================================================ #
+    
     def build_cnn_dueling(self, nb_ego_states, nb_states_per_vehicle, nb_vehicles, nb_actions, nb_conv_layers,
                           nb_conv_filters, nb_hidden_fc_layers, nb_hidden_neurons, activation='relu', window_length=1,
                           dueling_type='avg'):
@@ -231,7 +245,9 @@ class NetworkCNN(object):
         else:
             assert False, "dueling_type must be one of {'avg','max','naive'}"
         self.model = Model(inputs=self.model.input, outputs=outputlayer)
-
+    
+    # ============================================================ #
+    
     def build_cnn_dueling_prior(self, nb_ego_states, nb_states_per_vehicle, nb_vehicles, nb_actions, nb_conv_layers,
                                 nb_conv_filters, nb_hidden_fc_layers, nb_hidden_neurons, activation='relu',
                                 window_length=1, dueling_type='avg', prior_scale_factor=1.):
