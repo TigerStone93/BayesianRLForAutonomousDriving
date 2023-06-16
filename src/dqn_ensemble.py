@@ -149,6 +149,7 @@ class AbstractDQNAgent(Agent):
 
 # ========================================================================================== #
 
+# called by train_agent.py
 # An implementation of the DQN agent as described in Mnih (2013) and Mnih (2015).
 # http://arxiv.org/pdf/1312.5602.pdf
 # http://arxiv.org/abs/1509.06461
@@ -507,6 +508,7 @@ class DQNAgentEnsemble(AbstractDQNAgent):
 
 # ========================================================================================== #
 
+# called by train_agent.py
 class DQNAgentEnsembleParallel(AbstractDQNAgent):
     """
     Ensemble DQN agent, with parallel update of all ensemble members.
@@ -769,6 +771,7 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
 
 # ========================================================================================== #
 
+# called by init_parallel_execution() of class DQNAgentEnsembleParallel
 class Worker(mp.Process):
     """
     Creates a set of workers that maintains each ensemble member.
@@ -1023,6 +1026,7 @@ class Worker(mp.Process):
 
 # ========================================================================================== #
 
+# called by train_agent.py
 class UpdateActiveModelCallback(Callback):
     """
     Callback that decides which ensemble neural network that is active for each training episode.
