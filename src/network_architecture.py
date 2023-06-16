@@ -4,6 +4,7 @@ import keras.backend as K
 
 # ========================================================================================== #
 
+# NOT USED
 class NetworkMLP(object):
     """
     This class is used to build a neural network with an MLP structure.
