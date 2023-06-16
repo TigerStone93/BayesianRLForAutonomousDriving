@@ -64,6 +64,8 @@ class AbstractDQNAgent(Agent):
 
         # State.
         self.compiled = False
+        
+    # ============================================================ #
 
     def process_state_batch(self, batch):
         """ Heritage from keras-rl, not used here. """
@@ -72,6 +74,9 @@ class AbstractDQNAgent(Agent):
             return batch
         return self.processor.process_state_batch(batch)
 
+    # ============================================================ #
+    
+    # called by compute_q_values()
     def compute_batch_q_values(self, state_batch, net):
         batch = self.process_state_batch(state_batch)
         if self.parallel:
@@ -82,6 +87,8 @@ class AbstractDQNAgent(Agent):
         assert q_values.shape == (len(state_batch), self.nb_actions)
         return q_values
 
+    # ============================================================ #
+    
     def compute_q_values(self, state, net):
         """
         Compute Q-values for a particular state for a single ensemble member.
