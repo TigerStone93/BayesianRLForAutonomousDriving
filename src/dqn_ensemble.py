@@ -33,7 +33,6 @@ class AbstractDQNAgent(Agent):
         custom_model_objects (dict): Not currently used.
         **kwargs:
     """
-
     def __init__(self, nb_actions, memory, gamma=.99, batch_size=32, nb_steps_warmup=1000,
                  train_interval=1, memory_interval=1, target_model_update=10000,
                  delta_clip=np.inf, custom_model_objects=None, **kwargs):
@@ -172,9 +171,7 @@ class DQNAgentEnsemble(AbstractDQNAgent):
                 `avg`: Q(s,a;theta) = V(s;theta) + (A(s,a;theta)-Avg_a(A(s,a;theta)))
                 `max`: Q(s,a;theta) = V(s;theta) + (A(s,a;theta)-max_a(A(s,a;theta)))
                 `naive`: Q(s,a;theta) = V(s;theta) + A(s,a;theta)
-
     """
-
     def __init__(self, models, policy=None, test_policy=None, enable_double_dqn=True, enable_dueling_network=False,
                  dueling_type='avg', *args, **kwargs):
         super(DQNAgentEnsemble, self).__init__(*args, **kwargs)
@@ -282,15 +279,21 @@ class DQNAgentEnsemble(AbstractDQNAgent):
 
         self.compiled = True
 
+    # ============================================================ #
+    
     def load_weights(self, filepath):
         for i, model in enumerate(self.models):
             model.load_weights(filepath+"_"+str(i))
         self.update_target_model_hard()
 
+    # ============================================================ #
+    
     def save_weights(self, filepath, overwrite=False):
         for i, model in enumerate(self.models):
             model.save_weights(filepath+"_"+str(i), overwrite=overwrite)
 
+    # ============================================================ #
+    
     def reset_states(self):
         self.recent_action = None
         self.recent_observation = None
@@ -299,11 +302,15 @@ class DQNAgentEnsemble(AbstractDQNAgent):
                 self.models[i].reset_states()
                 self.target_models[i].reset_states()
 
+    # ============================================================ #
+    
     def update_target_model_hard(self):
         """ Copy current network parameters to the target network. """
         for i, target_model in enumerate(self.target_models):
             target_model.set_weights(self.models[i].get_weights())
 
+    # ============================================================ #
+    
     def forward(self, observation):
         """
         Ask the agent to choose an action based on the current observation.
@@ -337,6 +344,8 @@ class DQNAgentEnsemble(AbstractDQNAgent):
 
         return action, info
 
+    # ============================================================ #
+    
     def backward(self, reward, terminal):
         """ Store the most recent experience in the replay memory and update all ensemble networks. """
         # Store most recent experience in memory.
@@ -353,10 +362,11 @@ class DQNAgentEnsemble(AbstractDQNAgent):
 
         return metrics   # This is only the metrics of the last agent.
 
+    # ============================================================ #
+    
     def train_single_net(self, active_net):
         """ Retrieve a batch of experiences from the replay memory of the specified ensemble member and update
         the network weights. """
-
         metrics = [np.nan for _ in self.metrics_names]
         if not self.training:
             # We're done here. No need to update the experience memory since we only use the working
@@ -447,11 +457,15 @@ class DQNAgentEnsemble(AbstractDQNAgent):
 
         return metrics
 
+    # ============================================================ #
+    
     @property
     def layers(self):
         warnings.warn("Using layers in dqn, which has not been updated to ensemble.")
         return self.model.layers[:]    # Unsure how this function is used and therefore which model to use
 
+    # ============================================================ #
+    
     @property
     def metrics_names(self):
         # Throw away individual losses and replace output name since this is hidden from the user.
@@ -466,19 +480,27 @@ class DQNAgentEnsemble(AbstractDQNAgent):
         names += ["active_model"]
         return names
 
+    # ============================================================ #
+    
     @property
     def policy(self):
         return self.__policy
 
+    # ============================================================ #
+    
     @policy.setter
     def policy(self, policy):
         self.__policy = policy
         self.__policy._set_agent(self)
 
+    # ============================================================ #
+    
     @property
     def test_policy(self):
         return self.__test_policy
 
+    # ============================================================ #
+    
     @test_policy.setter
     def test_policy(self, policy):
         self.__test_policy = policy
@@ -507,9 +529,7 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
                 `avg`: Q(s,a;theta) = V(s;theta) + (A(s,a;theta)-Avg_a(A(s,a;theta)))
                 `max`: Q(s,a;theta) = V(s;theta) + (A(s,a;theta)-max_a(A(s,a;theta)))
                 `naive`: Q(s,a;theta) = V(s;theta) + A(s,a;theta)
-
     """
-
     def __init__(self, nb_models, learning_rate, nb_ego_states, nb_states_per_vehicle, nb_vehicles,  nb_conv_layers,
                  nb_conv_filters, nb_hidden_fc_layers, nb_hidden_neurons, network_seed, prior_scale_factor,
                  window_length, policy=None, test_policy=None, enable_double_dqn=True, enable_dueling_network=False,
@@ -555,6 +575,8 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
         self.init_parallel_execution()
         self.compiled = True
 
+    # ============================================================ #
+    
     def init_parallel_execution(self):
         """ Initalize one worker for each ensemble member and set up corresponding queues. """
         self.input_queues = [mp.Queue() for _ in range(self.nb_models)]
@@ -575,10 +597,14 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
         for worker in workers:
             worker.start()
 
+    # ============================================================ #
+    
     def change_active_model(self):
         """ Change which ensemble member that chooses the actions for each training episode."""
         self.active_model = np.random.randint(self.nb_models)
 
+    # ============================================================ #
+    
     def get_config(self):
         config = super(DQNAgentEnsemble, self).get_config()
         config['enable_double_dqn'] = self.enable_double_dqn
@@ -591,10 +617,14 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
             config['target_model'] = [get_object_config(target_model) for target_model in self.nb_models]
         return config
 
+    # ============================================================ #
+    
     def get_model_as_string(self):
         self.input_queues[0].put(['model_as_string'])   # All models are the same, so enough to get one of them
         return self.output_queues[0].get()
 
+    # ============================================================ #
+    
     def load_weights(self, filepath):
         for i in range(self.nb_models):
             self.input_queues[i].put(['load_weights', filepath+"_"+str(i)])
@@ -602,12 +632,16 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
             assert(output == 'weights_loaded_' + str(i))
         self.update_target_model_hard()
 
+    # ============================================================ #
+    
     def save_weights(self, filepath, overwrite=False):
         for i in range(self.nb_models):
             self.input_queues[i].put(['save_weights', filepath+"_"+str(i), overwrite])
             output = self.output_queues[i].get()
             assert(output == 'weights_saved_' + str(i))
 
+    # ============================================================ #
+    
     def reset_states(self):
         self.recent_action = None
         self.recent_observation = None
@@ -617,12 +651,16 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
                 out = self.output_queues[i].get()
                 assert(out == 'reset_states_done_' + str(i))
 
+    # ============================================================ #
+    
     def update_target_model_hard(self):
         for i in range(self.nb_models):
             self.input_queues[i].put(['update_target_model'])
             output = self.output_queues[i].get()
             assert(output == 'target_model_updated_' + str(i))
 
+    # ============================================================ #
+    
     def forward(self, observation):
         info = {}
         # Select an action.
@@ -647,6 +685,8 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
 
         return action, info
 
+    # ============================================================ #
+    
     def backward(self, reward, terminal):
         """ Store the most recent experience in the replay memory and update all ensemble networks. """
         # Store most recent experience in memory.
@@ -675,11 +715,15 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
 
         return metrics   # This is only the metrics of the last agent.
 
+    # ============================================================ #
+    
     @property
     def layers(self):
         warnings.warn("Using layers in dqn, which has not been updated to ensemble.")
         return self.model.layers[:]    # Unsure how this function is used and therefore which model to use
 
+    # ============================================================ #
+    
     @property
     def metrics_names(self):
         # Throw away individual losses and replace output name since this is hidden from the user.
@@ -698,19 +742,27 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
         names += ["active_model"]
         return names
 
+    # ============================================================ #
+    
     @property
     def policy(self):
         return self.__policy
 
+    # ============================================================ #
+    
     @policy.setter
     def policy(self, policy):
         self.__policy = policy
         self.__policy._set_agent(self)
 
+    # ============================================================ #
+    
     @property
     def test_policy(self):
         return self.__test_policy
 
+    # ============================================================ #
+    
     @test_policy.setter
     def test_policy(self, policy):
         self.__test_policy = policy
@@ -781,6 +833,8 @@ class Worker(mp.Process):
         self.target_model = None
         self.trainable_model = None
 
+    # ============================================================ #
+    
     def run(self):
         """ Initializes individual networks and starts the workers for each ensemble member. """
         np.random.seed(self.seed)
@@ -832,6 +886,8 @@ class Worker(mp.Process):
             self.output_queue.put(output)
         return
 
+    # ============================================================ #
+    
     def compile(self, metrics=None):
         """ Set up the training of the neural network."""
         if metrics is None:
@@ -875,6 +931,8 @@ class Worker(mp.Process):
         ]
         self.trainable_model.compile(optimizer=Adam(lr=self.lr), loss=losses, metrics=combined_metrics)
 
+    # ============================================================ #
+    
     def train_single_net(self, experiences):
         """ Retrieve a batch of experiences from the replay memory of the ensemble member and update
         the network weights. """
@@ -955,6 +1013,8 @@ class Worker(mp.Process):
 
         return metrics
 
+    # ============================================================ #
+    
     def process_state_batch(self, batch):
         """ Heritage from keras-rl, not used here. """
         batch = np.array(batch)
@@ -979,15 +1039,19 @@ class UpdateActiveModelCallback(Callback):
         super(UpdateActiveModelCallback, self).__init__()
         self.dqn = dqn
 
+    # ============================================================ #
+    
     def on_episode_begin(self, episode, logs={}):
         """ Change which ensemble member that is active. """
         self.dqn.change_active_model()
 
+# ========================================================================================== #
 
 def max_q(y_true, y_pred):
     """ Returns average maximum Q-value of training batch. """
     return K.mean(K.max(y_pred, axis=-1))
 
+# ============================================================ #
 
 def mean_q(y_true, y_pred):
     """ Returns average Q-value of training batch. """
