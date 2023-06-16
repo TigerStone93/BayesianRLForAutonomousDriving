@@ -23,7 +23,6 @@ In the log folder, the following is stored:
    - test_individual_qvalues_data.cvs: the estimated Q-values for all actions during the test episodes
 """
 
-
 import numpy as np
 import random   # Required to set random seed for replay memory
 
@@ -49,6 +48,7 @@ from callbacks import SaveWeights, EvaluateAgent
 import parameters as p
 import parameters_simulation as ps
 
+# ========================================================================================== #
 
 # Set log path and name
 start_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
