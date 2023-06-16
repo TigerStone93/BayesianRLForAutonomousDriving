@@ -2,7 +2,6 @@
 Based on the original dqn.py from keras-rl (https://github.com/keras-rl/keras-rl).
 Extended to handle an ensemble of agents with separate neural networks, which are trained on separate replay memories.
 """
-
 from __future__ import division
 import warnings
 from keras.layers import Lambda, Input
