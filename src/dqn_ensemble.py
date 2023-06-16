@@ -212,10 +212,14 @@ class DQNAgentEnsemble(AbstractDQNAgent):
         self.trainable_models = []
         self.target_models = None
 
+    # ============================================================ #
+    
     def change_active_model(self):
         """ Change which ensemble member that chooses the actions for each training episode."""
         self.active_model = np.random.randint(len(self.models))
 
+    # ============================================================ #
+    
     def get_config(self):
         config = super(DQNAgentEnsemble, self).get_config()
         config['enable_double_dqn'] = self.enable_double_dqn
@@ -228,6 +232,8 @@ class DQNAgentEnsemble(AbstractDQNAgent):
             config['target_model'] = [get_object_config(target_model) for target_model in self.target_models]
         return config
 
+    # ============================================================ #
+    
     def compile(self, optimizer, metrics=None):
         """ Set up the training of the neural network."""
         if metrics is None:
@@ -478,6 +484,7 @@ class DQNAgentEnsemble(AbstractDQNAgent):
         self.__test_policy = policy
         self.__test_policy._set_agent(self)
 
+# ========================================================================================== #
 
 class DQNAgentEnsembleParallel(AbstractDQNAgent):
     """
@@ -955,6 +962,7 @@ class Worker(mp.Process):
             return batch
         return self.processor.process_state_batch(batch)
 
+# ========================================================================================== #
 
 class UpdateActiveModelCallback(Callback):
     """
