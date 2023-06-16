@@ -14,6 +14,7 @@ from keras.callbacks import Callback
 import multiprocessing as mp
 from network_architecture import NetworkMLP, NetworkCNN
 
+# ========================================================================================== #
 
 class AbstractDQNAgent(Agent):
     """
@@ -67,6 +68,7 @@ class AbstractDQNAgent(Agent):
         
     # ============================================================ #
 
+    # called by compute_batch_q_values() and etc.
     def process_state_batch(self, batch):
         """ Heritage from keras-rl, not used here. """
         batch = np.array(batch)
@@ -89,6 +91,7 @@ class AbstractDQNAgent(Agent):
 
     # ============================================================ #
     
+    # called by compute_q_values_all_nets()
     def compute_q_values(self, state, net):
         """
         Compute Q-values for a particular state for a single ensemble member.
@@ -104,6 +107,9 @@ class AbstractDQNAgent(Agent):
         assert q_values.shape == (self.nb_actions,)
         return q_values
 
+    # ============================================================ #
+    
+    # called by forward()
     def compute_q_values_all_nets(self, state):
         """
         Compute Q-values for a particular state, for all ensemble members.
@@ -128,6 +134,8 @@ class AbstractDQNAgent(Agent):
             assert q_values_all_nets.shape == (len(self.models), self.nb_actions)
         return q_values_all_nets
 
+    # ============================================================ #
+    
     def get_config(self):
         return {
             'nb_actions': self.nb_actions,
@@ -141,6 +149,7 @@ class AbstractDQNAgent(Agent):
             'memory': get_object_config(self.memory),
         }
 
+# ========================================================================================== #
 
 # An implementation of the DQN agent as described in Mnih (2013) and Mnih (2015).
 # http://arxiv.org/pdf/1312.5602.pdf
@@ -700,6 +709,7 @@ class DQNAgentEnsembleParallel(AbstractDQNAgent):
         self.__test_policy = policy
         self.__test_policy._set_agent(self)
 
+# ========================================================================================== #
 
 class Worker(mp.Process):
     """
